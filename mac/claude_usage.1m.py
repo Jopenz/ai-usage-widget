@@ -47,13 +47,13 @@ RED = (224, 83, 61)
 
 DARK = os.environ.get("OS_APPEARANCE", "Dark") != "Light"
 if DARK:
-    FG, GRAY, TRACK = (242, 242, 247), (152, 152, 157), (72, 72, 74)
+    FG, GRAY, TRACK = (255, 255, 255), (152, 152, 157), (72, 72, 74)
 else:
-    FG, GRAY, TRACK = (29, 29, 31), (110, 110, 115), (199, 199, 204)
+    FG, GRAY, TRACK = (255, 255, 255), (110, 110, 115), (199, 199, 204)
 
 SCALE = 2         # drawn at 2x (retina) and tagged as 144 dpi
 HEIGHT_PT = 22    # menu bar height
-BAR_W_PT = 50
+BAR_W_PT = 46     # sized to fit a crowded menu bar near the notch (~90pt worst case)
 BAR_H_PT = 3.5
 
 
@@ -210,16 +210,14 @@ def bars_image(fhp, sdp, warning=False):
     f_lbl = _font(int(8.5 * S))
     f_pct = _font(int(8.5 * S), bold=True)
 
-    # Measurements
-    logo = 14 * S
-    x_lbl = logo + 5 * S
+    # Measurements (compact: logo + two bars + percentages, no 5h/7d labels)
+    logo = 13 * S
     tmp = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
-    w_lbl = max(tmp.textlength(t, font=f_lbl) for t in ("5h", "7d"))
-    x_bar = int(x_lbl + w_lbl + 4 * S)
+    x_bar = int(logo + 4 * S)
     bar_w = BAR_W_PT * S
-    x_pct = x_bar + bar_w + 5 * S
+    x_pct = x_bar + bar_w + 4 * S
     w_pct = max(tmp.textlength(f"{p}%", font=f_pct) for p in (fhp, sdp))
-    width = int(x_pct + w_pct + (12 * S if warning else 1 * S))
+    width = int(x_pct + w_pct + (11 * S if warning else 1 * S))
     width += width % SS
 
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
@@ -237,10 +235,9 @@ def bars_image(fhp, sdp, warning=False):
     rc = logo * 0.1
     d.ellipse([cx - rc, cy - rc, cx + rc, cy + rc], fill=LOGO_COLOR)
 
-    # Rows
+    # Rows (top = 5h, bottom = 7d; exact labels live in the dropdown)
     bar_h = int(BAR_H_PT * S)
-    for lbl, pct, yy in (("5h", fhp, 6 * S), ("7d", sdp, 16 * S)):
-        d.text((x_lbl, yy), lbl, font=f_lbl, fill=GRAY, anchor="lm")
+    for pct, yy in ((fhp, 6 * S), (sdp, 16 * S)):
         y0 = int(yy - bar_h / 2)
         d.rectangle([x_bar, y0, x_bar + bar_w - 1, y0 + bar_h - 1], fill=TRACK)
         p = max(0, min(pct, 100))
@@ -254,7 +251,7 @@ def bars_image(fhp, sdp, warning=False):
 
     img = img.resize((width // SS, height // SS), Image.LANCZOS)
     buf = io.BytesIO()
-    img.save(buf, "PNG", dpi=(72 * S, 72 * S))   # 144 dpi -> correct size on retina
+    img.save(buf, "PNG", dpi=(72 * SCALE, 72 * SCALE))   # 144 dpi -> correct size on retina
     return base64.b64encode(buf.getvalue()).decode("ascii")
 
 

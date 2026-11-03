@@ -6,6 +6,10 @@ Shows your **Claude Code** plan usage (5-hour session and 7-day weekly limits) a
 - **macOS** – a menu bar item via [SwiftBar](https://swiftbar.app).
 
 ![Widget on the Windows taskbar](docs/screenshot.jpg)
+*Windows – docked in the taskbar*
+
+![Widget in the macOS menu bar](docs/screenshot-mac.png)
+*macOS – in the menu bar (SwiftBar)*
 
 - `5h` = session window (resets every 5 hours) · `7d` = weekly window
 - Colors: green < 50%, yellow 50–79%, red ≥ 80%
